@@ -3,7 +3,7 @@
 # Clean app in packages.xml
 # Remove apk in data/app, data/data, and system
 #
-# v3.0
+# v3.0.4
 # By morogoku 
 # http://www.espdroids.com
 #
@@ -43,6 +43,7 @@ else
 	BB=/system/xbin/busybox;
 fi;
 fi;
+
 
 # Prepare packages.xml
 cd /data/system
@@ -108,38 +109,39 @@ run_script(){
 # If package is entered run script
 if [[ ! -z $1 ]]; then
 
-	ruta="name=\"$1\""
-	$BB echo "MC3[i]: Searching $1 in packages.xml..."
+	ruta="name=\"$1\"";
+	pkg=$1;
+	$BB echo "MC3[i]: Searching $1 in packages.xml...";
 	run_script;
 
 	# If entered options
 	if [[ ! -z $2 ]] && [[ $xfound = 1 ]]; then
 	
 		# If option "a" Remove apk from /data/app
-		if [[ $2 = *a* ]]; then
-			$BB rm -rf /data/app/$1*
+		case $2 in *a*)				
+			rm -rf /data/app/$pkg*
 			$BB echo "MC3[i]: Option a -> Removing from /data/app ..."
-		fi
-
+		;; esac
+		
 		# If option "d" Remove apk data from /data/data
-		if [[ $2 = *d* ]]; then
-			$BB rm -rf /data/data/$1
-			$BB echo "MC3[i]: Option d -> Removing from /data/data ..."
-		fi
-
+		case $2 in *d*)	
+			rm -rf /data/data/$pkg;
+			$BB echo "MC3[i]: Option d -> Removing from /data/data ...";
+		;; esac
+		
 		# If option "s" Remove apk from system if exist
-		if [[ $2 = *s* ]]; then
+		case $2 in *s*)	
 			if [ "$system_path" != "" ]; then
-				$BB rm -rf $system_path
-				$BB echo "MC3[i]: Option s -> Removing $system_path ..."
+				rm -rf $system_path;
+				$BB echo "MC3[i]: Option s -> Removing $system_path ...";
 			else
-				$BB echo "MC3[i]: Option s -> Not found apk in system"
+				$BB echo "MC3[i]: Option s -> Not found apk in system";
 			fi
-		fi
+		;; esac
 
 	else
 		if [[ $xfound = 1 ]]; then
-			$BB echo "MC3[i]: No options entered"
+			$BB echo "MC3[i]: No options entered";
 		fi
 	fi
 
