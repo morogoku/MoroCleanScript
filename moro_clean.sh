@@ -3,7 +3,7 @@
 # Clean app in packages.xml
 # Remove apk in data/app, data/data, and system
 #
-# v3.0.5
+# v3.1
 # By morogoku 
 # http://www.espdroids.com
 #
@@ -33,9 +33,41 @@
 #
 
 
-
 # Busybox 
-BB=/sbin/busybox;
+if [ -e /sbin/busybox ]; then
+	BB="/sbin/busybox"
+elif [ -e /tmp/busybox ]; then
+	BB="/tmp/busybox"
+elif [ -e /tmp/scripts/busybox ]; then
+	BB="/tmp/scripts/busybox"
+elif [ -e /tmp/moro/busybox ]; then
+	BB="/tmp/moro/busybox"
+elif [ -e /data/adb/magisk/busybox ]; then
+	BB="/data/adb/magisk/busybox"
+else
+	echo "MC3[e]: Busybox not detected, exit"
+	exit 1
+fi
+echo "MC3[i]: Busybox detected: $BB"
+
+
+#System
+if [ -d /system_root/system/priv-app ]; then
+	SYSTEM_DIR="/system_root"
+	SYSTEM_DETECTED=1
+	echo "MC3[i]: system detected: $SYSTEM_DIR/system"
+elif [ -d /system/system/priv-app ]; then
+	SYSTEM_DIR="/system"
+	SYSTEM_DETECTED=1
+	echo "MC3[i]: system detected: $SYSTEM_DIR/system"
+elif [ -d /system/priv-app ]; then
+	SYSTEM_DIR=""
+	SYSTEM_DETECTED=1
+	echo "MC3[i]: system detected: $SYSTEM_DIR/system"
+else
+	SYSTEM_DETECTED=0
+	echo "MC3[e]: system not detected"
+fi
 
 
 run_script(){
@@ -126,14 +158,18 @@ if [ -f /data/system/packages.xml ]; then
 			;; esac
 			
 			# If option "s" Remove apk from system if exist
-			case $2 in *s*)	
-				if [ "$system_path" != "" ]; then
-					rm -rf $system_path;
-					$BB echo "MC3[i]: Option s -> Removing $system_path ...";
-				else
-					$BB echo "MC3[i]: Option s -> Not found apk in system";
-				fi
-			;; esac
+			if [[ $SYSTEM_DETECTED = 1 ]]; then
+				case $2 in *s*)	
+					if [ "$system_path" != "" ]; then
+						rm -rf $SYSTEM_DIR$system_path;
+						$BB echo "MC3[i]: Option s -> Removing $system_path ...";
+					else
+						$BB echo "MC3[i]: Option s -> Not found apk in system";
+					fi
+				;; esac
+			else
+				$BB echo "MC3[e]: Option s -> not applicable, system not detected";
+			fi	
 
 		else
 			if [[ $xfound = 1 ]]; then
